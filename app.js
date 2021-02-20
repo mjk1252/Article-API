@@ -6,7 +6,11 @@ const ejs = require("ejs");
 const mongoose = require('mongoose');
 
 
-mongoose.connect("mongodb://localhost:27017/wikiDB", {useNewUrlParser: true, useUnifiedTopology:true, useFindAndModify: false });
+mongoose.connect("mongodb://localhost:27017/wikiDB", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+});
 
 const articleSchema = {
     title: String,
@@ -21,26 +25,54 @@ const app = express();
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({
-  extended: true
+    extended: true
 }));
 app.use(express.static("public"));
 
 //TODO
 
-app.get("/articles", (req, res) => {
+app.route("/articles")
+
+.get((req, res) => {
     Article.find({}, (err, foundArticles) => {
-        if(!err){
+        if (!err) {
             res.send(foundArticles);
-        }
-        else{
-            console.log(err);
+        } else {
+            res.send(err);
         }
     })
 })
 
 
+.post((req, res) => {
+
+    const newArticle = new Article({
+        title: req.body.title,
+        content: req.body.content
+    });
+
+    newArticle.save((err) => {
+        if (!err) {
+            res.send("Success!");
+        } else {
+            res.send(err);
+        }
+    })
+})
 
 
-app.listen(3000, function() {
-  console.log("Server started on port 3000");
+.delete(function (req, res) {
+    Article.deleteMany((err) => {
+        if (!err) {
+            res.send("Deleted all articles");
+        } else {
+            res.send(err);
+        }
+    })
+});
+
+
+
+app.listen(3000, function () {
+    console.log("Server started on port 3000");
 });
